@@ -3,15 +3,22 @@ token = '5398802223:AAFtbdoX_tZtHn36sRVf8pl7lgg1sMzh4hw'
 bot = telebot.TeleBot(token)
 
 
+@bot.message_handler(commands=['start'])
+def start(message):
+    mess = f'Привет, {message.from_user.first_name}, вы хотите купить ткань?'
+    bot.send_message(message.from_user.id, mess)
+
+
+
 @bot.message_handler(content_types=['text'])
-def get_text_messages(message):
+def get_user_text(message):
 
     if message.text == "Привет":
-        bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
-    elif message.text == "/help":
-        bot.send_message(message.from_user.id, "Напиши привет")
-    else:
-        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
+        mess = f'Привет, {message.from_user.first_name}, вы хотите купить тттт ткань?'
+        bot.send_message(message.from_user.id, mess)
+    
+
+
 
 
 bot.polling(none_stop=True, interval=0)
