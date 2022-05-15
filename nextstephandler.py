@@ -27,7 +27,7 @@ def start(message):
         bot.send_message(message.from_user.id, 'Напиши /reg')
 
 
-def get_name(message):  # получаем фамилию
+def get_name(message):  
     global name;
     name = message.text;
     bot.send_message(message.from_user.id, 'Какая у тебя фамилия?')

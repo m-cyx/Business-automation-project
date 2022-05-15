@@ -1,11 +1,12 @@
-a = [1, 2, 3]
-a.append(2)
+s = 'aaabbcdddd'
 
-k = 1
+def convert(s):
+    converted_str = ''
+    for el in s:
+        converted_str += el + str(s.count(el))
 
-d = {
-    'россия': 'msk',
-    'usa': 'wash',
-    'соликамск': 'пермь',
-}
-    
+    return converted_str
+
+print(convert(s))
+
+return ''.join(i + str(text.count(i)) for i in sorted(set(text)))
