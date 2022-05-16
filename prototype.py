@@ -7,18 +7,22 @@ bot = telebot.TeleBot(config.token)
 
 
 name = ''
-surname = ''
 product_id = 0
 phone_number = ''
 
 # Экран приветствия на комманду старт
 # Позже этот текст помещается в описание бота и виден сразу без начала диалога
 
+# Создать каталог. Отправит фото с номерами и Текст с описанием
+# Позже текст с описанием будет формироваться на основе таблицы в бд КАТАЛОГ
+# Для КАТАЛОГ сделать вьюшку, через которую можно управлять остатками и загружать в бота новые фотки
+
 BotDB = BotDB('db/bot.db')
 
 
 @bot.message_handler(commands=['test'])
 def test(message):
+    print(message)
     user_id = message.from_user.id
     user_name = message.from_user.first_name
     user_surname = message.from_user.last_name
@@ -78,6 +82,7 @@ def start_message(message):
 
 
 def create_order(message):
+
     bot.send_message(message.from_user.id,
                      "Пожалуйста, напишите номер желаемой позиции :)")
     bot.register_next_step_handler(message, get_product_id)
@@ -136,6 +141,9 @@ def confirm_order(message):
 def callback_worker(call):
     if call.data == "yes":  # call.data это callback_data, которую мы указали при объявлении кнопки
         # код сохранения данных, или их обработки
+        BotDB.add_order(call.from_user.id,
+                        name, product_id, phone_number) # тут заработало, из call взял user_id
+
         bot.send_message(call.message.chat.id,
                          'Передал Ваш заказ в обработку :)')
     elif call.data == "no":

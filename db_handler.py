@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class BotDB:
 
     def __init__(self, db_file):
@@ -9,7 +10,7 @@ class BotDB:
     def user_exists(self, user_id):
         """Проверяем, есть ли юзер в базе"""
         result = self.cursor.execute(
-            "SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id))
+            "SELECT `id` FROM `users` WHERE `user_id` = ?", (user_id,))
         return bool(len(result.fetchall()))
 
     def get_user_id(self, user_id):
@@ -21,15 +22,13 @@ class BotDB:
     def add_user(self, user_id, user_name, user_surname, user_name_telegram):
         """Добавляем юзера в базу"""
         self.cursor.execute(
-            "INSERT INTO `users` (user_id, user_name, user_surname, user_name_telegram) VALUES (?, ?, ?, ?)", (user_id, user_name, user_surname, user_name_telegram))
+            "INSERT INTO `users` (user_id, user_name, user_surname, user_name_telegram) VALUES (?, ?, ?, ?)", (user_id, user_name, user_surname, user_name_telegram,))
         return self.conn.commit()
 
-    def add_record(self, user_id, operation, value):
-        """Создаем запись о доходах/расходах"""
-        self.cursor.execute("INSERT INTO `records` (`users_id`, `operation`, `value`) VALUES (?, ?, ?)",
-                            (self.get_user_id(user_id),
-                             operation == "+",
-                             value))
+    def add_order(self, user_id, name, product_id, phone_number):
+        """Создаем запись о заказе"""
+        self.cursor.execute("INSERT INTO orders (user_id, name, product_id, phone_number) VALUES (?, ?, ?, ?)",
+                            (user_id, name, product_id, phone_number,))
         return self.conn.commit()
 
     def get_records(self, user_id, within="all"):
@@ -53,4 +52,3 @@ class BotDB:
     def close(self):
         """Закрываем соединение с БД"""
         self.connection.close()
-
