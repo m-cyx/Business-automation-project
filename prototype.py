@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import config
+from db_handler import BotDB
 
 bot = telebot.TeleBot(config.token)
 
@@ -13,9 +14,32 @@ phone_number = ''
 # Экран приветствия на комманду старт
 # Позже этот текст помещается в описание бота и виден сразу без начала диалога
 
+BotDB = BotDB('db/bot.db')
+
+
+@bot.message_handler(commands=['test'])
+def test(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    user_surname = message.from_user.last_name
+    user_name_telegram = message.from_user.username
+
+    if(not BotDB.user_exists(message.from_user.id)):
+        BotDB.add_user(user_id, user_name, user_surname, user_name_telegram)
+
+    msg = (
+        f"Твой ID: {user_id}\n"
+        f"Твоё Имя: {user_name}\n"
+        f"Твоя Фамилия: {user_surname}\n"
+        f"Твоя телега: {user_name_telegram}"
+    )
+    bot.send_message(message.from_user.id, msg)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    if not BotDB.user_exists(message.from_user.id):
+        BotDB.add_user(message.from_user.id)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
@@ -69,7 +93,7 @@ def get_product_id(message):
         bot.register_next_step_handler(message, get_name)
     except Exception:
         bot.send_message(message.from_user.id, 'Цифрами, пожалуйста')
-        get_product_id(message)
+        # get_product_id(message)
 
 
 def get_name(message):  # получаем имя
@@ -121,9 +145,9 @@ def callback_worker(call):
 
 bot.polling(none_stop=True, interval=0)
 
-# Кароче проще заменить на клавиатурные кнопки, чем на кнопки на сообщениях.
-# Так можно без калбек хандлера обрабатывать.
 # Закрывать клаивиаатуру после того как сделан выбор в начале.
-# Калбек хандлер использовать для подтверждения заказа.
-# Посмотреть гайд с закладок
-# прописать сценарии
+# Сделать две таблицы: Users Orders
+# Подрубить к боту, только без глобальных переменных, а чтобы из функции сразу запись в бд шла
+# Делать на ткинтере интерфейсы
+# или на бутстрапе
+# добавить боту какую-нибудь шляпу с нейронкой или другой прикол
