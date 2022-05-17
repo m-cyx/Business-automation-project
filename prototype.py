@@ -17,6 +17,11 @@ phone_number = ''
 # Позже текст с описанием будет формироваться на основе таблицы в бд КАТАЛОГ
 # Для КАТАЛОГ сделать вьюшку, через которую можно управлять остатками и загружать в бота новые фотки
 
+# Сделать опцию выбора доставки
+
+# для бд взять пример по которому заново смоделировать бд
+# чтобы у одного пользователя могло быть несколько позиций в заказе
+
 BotDB = BotDB('db/bot.db')
 
 
@@ -84,21 +89,25 @@ def start_message(message):
 def create_order(message):
 
     bot.send_message(message.from_user.id,
-                     "Пожалуйста, напишите номер желаемой позиции :)")
+                     "Пожалуйста, напишите номер желаемой позиции из каталога :)\n (Я записываю по одному за раз)")
     bot.register_next_step_handler(message, get_product_id)
 
 
-def get_product_id(message):
+def get_product_id(message): #рабочая версия проверки
     global product_id
-    try:
+
+    if message.text.isdigit():
         # проверяем, что айди введен корректно
         product_id = int(message.text)
-
         bot.send_message(message.from_user.id, 'Ваше имя?')
         bot.register_next_step_handler(message, get_name)
-    except Exception:
+    else:
         bot.send_message(message.from_user.id, 'Цифрами, пожалуйста')
-        # get_product_id(message)
+        bot.register_next_step_handler(message, get_product_id)
+
+
+    
+    
 
 
 def get_name(message):  # получаем имя
@@ -142,7 +151,7 @@ def callback_worker(call):
     if call.data == "yes":  # call.data это callback_data, которую мы указали при объявлении кнопки
         # код сохранения данных, или их обработки
         BotDB.add_order(call.from_user.id,
-                        name, product_id, phone_number) # тут заработало, из call взял user_id
+                        name, product_id, phone_number)  # тут заработало, из call взял user_id
 
         bot.send_message(call.message.chat.id,
                          'Передал Ваш заказ в обработку :)')
