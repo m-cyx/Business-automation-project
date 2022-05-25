@@ -22,12 +22,15 @@ phone_number = ''
 # для бд взять пример по которому заново смоделировать бд
 # чтобы у одного пользователя могло быть несколько позиций в заказе
 
+# Написать выход из каждого состояния мб через брейк? Тогда будет с экрана старта работать
+# Типа if messge text in exit_text: 'ок выходим' break. exit_text = [отмена, выход] обернуть в void функцию мб
+
 BotDB = BotDB('db/bot.db')
 
 
 @bot.message_handler(commands=['test'])
 def test(message):
-    print(message)
+    # print(message)
     user_id = message.from_user.id
     user_name = message.from_user.first_name
     user_surname = message.from_user.last_name
@@ -47,10 +50,15 @@ def test(message):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    if not BotDB.user_exists(message.from_user.id):
-        BotDB.add_user(message.from_user.id)
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    user_surname = message.from_user.last_name
+    user_name_telegram = message.from_user.username
+    if(not BotDB.user_exists(message.from_user.id)):
+        BotDB.add_user(user_id, user_name, user_surname, user_name_telegram)
 
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = types.ReplyKeyboardMarkup(
+        resize_keyboard=True, one_time_keyboard=True)
 
     key_catalog = types.KeyboardButton(text='Каталог')
     key_create_order = types.KeyboardButton(text='Сделать заказ')
@@ -59,7 +67,7 @@ def start(message):
     keyboard.add(key_get_info, key_create_order, key_catalog)
 
     msg = (f"Здравствуйте, {message.from_user.first_name}!\n"
-           "Я умный бот - Тканевый Барон \n"
+           "Я умный помощник. Могу быть вам полезен? \n"
            "Подскажу, помогу сделать заказ :)")
 
     bot.send_message(message.from_user.id, msg, reply_markup=keyboard)
@@ -82,8 +90,17 @@ def start_message(message):
         bot.send_message(message.from_user.id, msg)
 
     else:
+        # вынести в класс-конструктор для клавиатуры. создавать объект класса по аргументам - кнопкам
+        keyboard = types.ReplyKeyboardMarkup(
+            resize_keyboard=True, one_time_keyboard=True)
+
+        key_catalog = types.KeyboardButton(text='Каталог')
+        key_create_order = types.KeyboardButton(text='Сделать заказ')
+        key_get_info = types.KeyboardButton(text='Получить инфо')
+
+        keyboard.add(key_get_info, key_create_order, key_catalog)
         bot.send_message(
-            message.from_user.id, "Извините, не совсем Вас понял.\nПопробуйте выбрать одну из комманд :)")
+            message.from_user.id, "Извините, не совсем Вас понял.\nПопробуйте выбрать одну из комманд :)", reply_markup=keyboard)
 
 
 def create_order(message):
@@ -93,7 +110,7 @@ def create_order(message):
     bot.register_next_step_handler(message, get_product_id)
 
 
-def get_product_id(message): #рабочая версия проверки
+def get_product_id(message):  # рабочая версия проверки
     global product_id
 
     if message.text.isdigit():
@@ -106,14 +123,34 @@ def get_product_id(message): #рабочая версия проверки
         bot.register_next_step_handler(message, get_product_id)
 
 
-    
-    
-
-
 def get_name(message):  # получаем имя
     # можно предложить имя пользователя из телеги или предложить ввести самому
     global name
     name = message.text
+
+    if name == 'Андрей':
+        bot.send_message(message.from_user.id, 'Андрей? Сто минусов!')
+
+    keyboard = types.ReplyKeyboardMarkup(
+        resize_keyboard=True, one_time_keyboard=True)
+
+    key_self_care = types.KeyboardButton(text='Самовывоз')
+    key_delivery = types.KeyboardButton(text='Доставка')
+
+    keyboard.add(key_self_care, key_delivery)
+
+    msg = ("Заберёте сами или сделаем доставку?")
+
+    bot.send_message(message.from_user.id, msg, reply_markup=keyboard)
+    bot.register_next_step_handler(message, get_order_type)
+
+
+def get_order_type(message):
+    global get_order_type
+    get_order_type = message.text
+    # из инлайн режима мб выбор?
+    # надёжнее будет предложить доставку или самовывоз кнопками
+
     bot.send_message(message.from_user.id,
                      'Пожалуйста, введите номер телефона')
     bot.register_next_step_handler(message, get_phone_number)
