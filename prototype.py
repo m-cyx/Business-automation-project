@@ -176,6 +176,8 @@ def confirm_order(message):
     keyboard.add(key_no, key_yes)
 
     question = (f'Ваш заказ: {product_id}\n'
+    # question = (f'Ваш заказ: Шнурок хлопковый "Серый пепел"\n'
+                f'Кол-во: 1 шт.\n'
                 f'Ваши контактные данные:\n'
                 f'{name}, т.: {phone_number}\n'
                 'Всё верно?')
